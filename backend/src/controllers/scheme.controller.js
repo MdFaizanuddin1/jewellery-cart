@@ -164,4 +164,62 @@ const deleteOne = asyncHandler(async (req, res) => {
     .json(new ApiResponse(200, deletedScheme, "scheme deleted successfully"));
 });
 
-export { createScheme, deleteAll, getScheme, getAllSchemes, deleteOne };
+const editScheme = asyncHandler(async (req, res) => {
+  const { schemeId } = req.params;
+  const { name, description } = req.body;
+  const newImage = req.file; // New image if provided
+
+  // Retrieve the existing scheme
+  const scheme = await Scheme.findById(schemeId);
+  if (!scheme) {
+    throw new ApiError(404, "No scheme found with the given ID");
+  }
+
+  if (req.user.role != "admin") {
+    throw new ApiError(403, "Only admin can edit the scheme");
+  }
+
+  let oldImagePath = null;
+  if (newImage) {
+    // If there is a new image, delete the old image
+    const oldImageUrl = scheme.thumbnailImg; // e.g., http://localhost:8000/uploads/image.jpg
+    oldImagePath = path.join(
+      __dirname,
+      "../../public/temp",
+      path.basename(oldImageUrl),
+    ); // Get old image file path
+
+    // Delete the old image file
+    try {
+      fs.unlinkSync(oldImagePath); // Synchronously delete the old file
+      console.log(`Deleted old image: ${oldImagePath}`);
+    } catch (err) {
+      console.error(`Error deleting old file: ${oldImagePath}`, err);
+      throw new ApiError(500, `Error deleting the old image: ${oldImagePath}`);
+    }
+
+    // Generate new image URL
+    const newImageUrl = `${req.protocol}://${req.get("host")}/${newImage.filename}`;
+    scheme.thumbnailImg = newImageUrl; // Update the image URL in the scheme
+  }
+
+  // Update the scheme details
+  scheme.name = name || scheme.name; // Update name if provided, else keep the old value
+  scheme.description = description || scheme.description; // Update description if provided
+
+  // Save the updated scheme
+  const updatedScheme = await scheme.save();
+
+  return res
+    .status(200)
+    .json(new ApiResponse(200, scheme, "Scheme updated successfully"));
+});
+
+export {
+  createScheme,
+  deleteAll,
+  getScheme,
+  getAllSchemes,
+  deleteOne,
+  editScheme,
+};

@@ -3,6 +3,7 @@ import {
   createScheme,
   deleteAll,
   deleteOne,
+  editScheme,
   getAllSchemes,
   getScheme,
 } from "../controllers/scheme.controller.js";
@@ -16,5 +17,8 @@ router.route("/deleteAll").delete(verifyJWT, deleteAll);
 router.route("/delete/:schemeId").delete(verifyJWT, deleteOne);
 router.route("/getScheme/:schemeId").get(getScheme);
 router.route("/getAllSchemes").get(getAllSchemes);
+router
+  .route("/edit/:schemeId")
+  .put(upload.single("image"), verifyJWT, editScheme);
 
 export default router;
