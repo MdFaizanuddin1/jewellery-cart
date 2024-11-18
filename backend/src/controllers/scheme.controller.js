@@ -19,11 +19,11 @@ const createScheme = asyncHandler(async (req, res) => {
 
   const image = req.file;
 
-  console.log("thumbnail image is", image);
+  // console.log("thumbnail image is", image);
 
   const imageUrl = `${req.protocol}://${req.get("host")}/${image.filename}`;
 
-  console.log("image url is", imageUrl);
+  // console.log("image url is", imageUrl);
   // this line will store something like this ----- http://localhost:8000/image.jpg
 
   if (!imageUrl) {
@@ -128,4 +128,40 @@ const getScheme = asyncHandler(async (req, res) => {
     .json(new ApiResponse(200, scheme, "Scheme fetched successfully"));
 });
 
-export { createScheme, deleteAll, getScheme, getAllSchemes };
+const deleteOne = asyncHandler(async (req, res) => {
+  const { schemeId } = req.params;
+  const scheme = await Scheme.findById(schemeId);
+  if (!scheme) {
+    throw new ApiError(404, "No scheme found");
+  }
+
+  if (req.user.role != "admin") {
+    throw new ApiError(404, "you are not authorized to delete the scheme");
+  }
+
+  const imageUrl = scheme.thumbnailImg; // e.g., http://localhost:8000/uploads/image.jpg
+  const imagePath = path.join(
+    __dirname,
+    "../../public/temp",
+    path.basename(imageUrl),
+  ); // Adjust path to 'uploads' folder
+  // console.log(imagePath)
+
+  try {
+    fs.unlinkSync(imagePath); // Delete the file
+    // console.log(`Deleted file: ${imagePath}`);
+  } catch (err) {
+    console.error(`Error deleting file: ${imagePath}`, err);
+    throw new ApiError(500, `error deleting file , ${imagePath}`);
+  }
+
+  const deletedScheme = await Scheme.findByIdAndDelete(schemeId);
+  if (deletedScheme.deletedCount < 0) {
+    throw new ApiError(500, "Error while deleting the scheme");
+  }
+  return res
+    .status(200)
+    .json(new ApiResponse(200, deletedScheme, "scheme deleted successfully"));
+});
+
+export { createScheme, deleteAll, getScheme, getAllSchemes, deleteOne };
