@@ -58,6 +58,55 @@ const createScheme = asyncHandler(async (req, res) => {
     .json(new ApiResponse(200, createdScheme, "Scheme created successfully"));
 });
 
+const deleteAll = asyncHandler(async (req, res) => {
+  if (!req.user.role === "admin") {
+    throw new ApiError(404, "only admin can delete the scheme");
+  }
+
+  // Retrieve all schemes created by the admin
+  const schemes = await Scheme.find({ createdBy: req.user._id });
+
+  if (!schemes.length) {
+    throw new ApiError(404, "No schemes found with your admin ID");
+  }
+
+  // Delete the images associated with the schemes
+  for (const scheme of schemes) {
+    const imageUrl = scheme.thumbnailImg; // e.g., http://localhost:8000/uploads/image.jpg
+    const imagePath = path.join(
+      __dirname,
+      "../../public/temp",
+      path.basename(imageUrl),
+    ); // Adjust path to 'uploads' folder
+    // console.log(imagePath)
+
+    try {
+      fs.unlinkSync(imagePath); // Delete the file
+      // console.log(`Deleted file: ${imagePath}`);
+    } catch (err) {
+      console.error(`Error deleting file: ${imagePath}`, err);
+      throw new ApiError(500, `error deleting file , ${imagePath}`);
+    }
+  }
+
+  // Delete the schemes
+  const deleted = await Scheme.deleteMany({ createdBy: req.user._id });
+
+  if (!deleted.deletedCount) {
+    throw new ApiError(404, "No schemes found with your admin ID");
+  }
+
+  return res
+    .status(200)
+    .json(
+      new ApiResponse(
+        200,
+        deleted.deletedCount,
+        "All schemes and associated images deleted successfully",
+      ),
+    );
+});
+
 const getAllSchemes = asyncHandler(async (req, res) => {
   const schemes = await Scheme.find();
   if (!schemes || schemes.length == 0) {
