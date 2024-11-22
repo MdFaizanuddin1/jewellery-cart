@@ -35,10 +35,16 @@ const userSchema = new mongoose.Schema(
       unique: true,
       sparse: true, // Allows the field to be optional but unique when provided
     },
+    aadharImg :{ 
+      type :[String]
+  },
     pan: {
       type: String, // Store PAN as a string
       unique: true,
       sparse: true,
+    },
+    panImg :{
+      type :[String]
     },
     address: [
       {
