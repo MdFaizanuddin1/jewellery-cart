@@ -2,13 +2,14 @@ import mongoose from "mongoose";
 
 const schemePurchaseSchema = new mongoose.Schema(
   {
-    userId: {
+    purchasedBy: {
       type: mongoose.Schema.Types.ObjectId, // Reference to the User model
       ref: "User",
       required: true,
     },
-    schemeName: {
-      type: String,
+    scheme: {
+      type: mongoose.Schema.Types.ObjectId,
+      ref: "Scheme",
       required: true,
     },
     quantity: {
@@ -19,14 +20,18 @@ const schemePurchaseSchema = new mongoose.Schema(
       type: Date,
       default: Date.now,
     },
-    aadhar: {
-      type: String,
+    amount: {
+      type: Number,
       required: true,
     },
-    pan: {
-      type: String,
-      required: true,
-    },
+    // aadhar: {
+    //   type: String,
+    //   required: true,
+    // },
+    // pan: {
+    //   type: String,
+    //   required: true,
+    // },
   },
   {
     timestamps: true,

@@ -166,7 +166,7 @@ const deleteOne = asyncHandler(async (req, res) => {
 
 const editScheme = asyncHandler(async (req, res) => {
   const { schemeId } = req.params;
-  const { name, description } = req.body;
+  const { name, description ,schemeType} = req.body;
   const newImage = req.file; // New image if provided
 
   // Retrieve the existing scheme
@@ -206,6 +206,7 @@ const editScheme = asyncHandler(async (req, res) => {
   // Update the scheme details
   scheme.name = name || scheme.name; // Update name if provided, else keep the old value
   scheme.description = description || scheme.description; // Update description if provided
+  scheme.schemeType = schemeType || scheme.schemeType; 
 
   // Save the updated scheme
   const updatedScheme = await scheme.save();

@@ -16,8 +16,19 @@ const schemeSchema = Schema(
     },
     createdBy: {
       type: mongoose.Schema.Types.ObjectId,
+      ref: "User",
       required: true,
     },
+    schemeType: {
+      type: String,
+      enum: ["oneTime", "monthly"],
+    },
+    subscribedBy: [
+      {
+        type: mongoose.Schema.Types.ObjectId,
+        ref: "User",
+      },
+    ],
   },
   { timestamps: true },
 );

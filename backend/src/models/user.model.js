@@ -1,7 +1,6 @@
 import mongoose from "mongoose";
 import bcrypt from "bcrypt";
-import jwt from 'jsonwebtoken'
-
+import jwt from "jsonwebtoken";
 
 const userSchema = new mongoose.Schema(
   {
@@ -35,21 +34,27 @@ const userSchema = new mongoose.Schema(
       unique: true,
       sparse: true, // Allows the field to be optional but unique when provided
     },
-    aadharImg :{ 
-      type :[String]
-  },
+    aadharImg: {
+      type: [String],
+    },
     pan: {
       type: String, // Store PAN as a string
       unique: true,
       sparse: true,
     },
-    panImg :{
-      type :[String]
+    panImg: {
+      type: [String],
     },
     address: [
       {
         type: mongoose.Schema.Types.ObjectId,
         ref: "Address",
+      },
+    ],
+    subscribedSchemes: [
+      {
+        type: mongoose.Schema.Types.ObjectId,
+        ref: "SchemePurchase",
       },
     ],
   },
@@ -61,7 +66,7 @@ const userSchema = new mongoose.Schema(
 userSchema.pre("save", async function (next) {
   if (!this.isModified("password")) return next(); // Only hash if password is new or modified
 
-  this.password =await bcrypt.hash(this.password, 10); // Hash the password
+  this.password = await bcrypt.hash(this.password, 10); // Hash the password
 
   next();
 });
@@ -83,7 +88,6 @@ userSchema.methods.token = function () {
     { expiresIn: process.env.TOKEN_EXPIRY },
   );
 };
-
 
 // Create User model
 export const User = mongoose.model("User", userSchema);
