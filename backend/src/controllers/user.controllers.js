@@ -43,12 +43,19 @@ const registerUser = asyncHandler(async (req, res) => {
     throw new ApiError(409, "User with email or userName already exists");
   }
 
-  const user = await User.create({
+  const userData = {
     userName,
     email,
     password,
     fullName,
-  });
+  };
+  
+  // Include `role` only if it exists in the request body
+  if (role) {
+    userData.role = role;
+  }
+
+  const user = await User.create(userData);
 
   const createdUser = await User.findById(user._id).select(
     "-password -refreshToken",
