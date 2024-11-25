@@ -49,7 +49,7 @@ const registerUser = asyncHandler(async (req, res) => {
     password,
     fullName,
   };
-  
+
   // Include `role` only if it exists in the request body
   if (role) {
     userData.role = role;
@@ -161,9 +161,33 @@ const changeCurrentPassword = asyncHandler(async (req, res) => {
 });
 
 const getCurrentUser = asyncHandler(async (req, res) => {
+  const user = await User.findById(req.user._id)
+    .populate("subscribedSchemes")
+    .populate("address");
+
   return res
     .status(200)
-    .json(new ApiResponse(200, req.user, "Current user details"));
+    .json(new ApiResponse(200, user, "Current user details"));
+});
+
+const getAllUser = asyncHandler(async (req, res) => {
+  if (req.user.role != "admin") {
+    throw new ApiError(404, "You are not authorized to check all users");
+  }
+  const users = await User.find()
+    .populate("subscribedSchemes")
+    .populate("address");
+  return res
+    .status(200)
+    .json(
+      new ApiResponse(
+        200,
+        users,
+        users.length > 0
+          ? `Total ${users.length} users fetched successfully`
+          : "No users found",
+      ),
+    );
 });
 
 export {
@@ -172,4 +196,5 @@ export {
   logoutUser,
   changeCurrentPassword,
   getCurrentUser,
+  getAllUser,
 };

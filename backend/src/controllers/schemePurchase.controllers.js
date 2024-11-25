@@ -71,8 +71,9 @@ const getAllSubscribers = asyncHandler(async (req, res) => {
   schemes.map((scheme) =>
     scheme.subscribedBy.map((ele) => subscribedBy.push(ele)),
   );
+  
 
-  // console.log("subscribedBy is", subscribedBy):
+  // console.log("subscribedBy is", subscribedBy)
   // " const subscribers = [];
   // subscribedBy.map(async (ele) => {
   // const user await User.findById(ele).select("-password");
@@ -92,13 +93,13 @@ const getAllSubscribers = asyncHandler(async (req, res) => {
     }),
   );
 
-  //console.log("All subscribers:", subscribers);
+  //console.log("All subscribers:", subscribers)
 
   if (!subscribers) {
     throw new ApiError(500, "No subscribers was found");
   }
 
-  // console.log("subs is", subscribers):
+  // console.log("subs is", subscribers)
 
   const idUserNameFromSubscribers = subscribers.map((ele) => {
     return {
