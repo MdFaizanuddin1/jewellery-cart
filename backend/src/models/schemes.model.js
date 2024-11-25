@@ -23,6 +23,14 @@ const schemeSchema = Schema(
       type: String,
       enum: ["oneTime", "monthly"],
     },
+    minAmount: {
+      type: Number,
+      required: true,
+    },
+    maxAmount: {
+      type: Number,
+      required: true,
+    },
     subscribedBy: [
       {
         type: mongoose.Schema.Types.ObjectId,

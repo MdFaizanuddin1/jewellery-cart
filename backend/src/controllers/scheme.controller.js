@@ -15,7 +15,7 @@ const __dirname = path.dirname(__filename);
 // console.log('dirname is ', __dirname)
 
 const createScheme = asyncHandler(async (req, res) => {
-  const { name, description } = req.body;
+  const { name, description, minAmount, maxAmount } = req.body;
 
   const image = req.file;
 
@@ -46,6 +46,8 @@ const createScheme = asyncHandler(async (req, res) => {
     description,
     thumbnailImg: imageUrl,
     createdBy: admin._id,
+    minAmount,
+    maxAmount,
   });
 
   const createdScheme = await Scheme.findById(scheme._id);
@@ -166,7 +168,7 @@ const deleteOne = asyncHandler(async (req, res) => {
 
 const editScheme = asyncHandler(async (req, res) => {
   const { schemeId } = req.params;
-  const { name, description ,schemeType} = req.body;
+  const { name, description, schemeType, minAmount, maxAmount } = req.body;
   const newImage = req.file; // New image if provided
 
   // Retrieve the existing scheme
@@ -206,7 +208,9 @@ const editScheme = asyncHandler(async (req, res) => {
   // Update the scheme details
   scheme.name = name || scheme.name; // Update name if provided, else keep the old value
   scheme.description = description || scheme.description; // Update description if provided
-  scheme.schemeType = schemeType || scheme.schemeType; 
+  scheme.schemeType = schemeType || scheme.schemeType;
+  scheme.maxAmount = maxAmount || scheme.maxAmount;
+  scheme.minAmount = minAmount || scheme.minAmount;
 
   // Save the updated scheme
   const updatedScheme = await scheme.save();
