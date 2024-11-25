@@ -47,8 +47,8 @@ const addPanAadhar = asyncHandler(async (req, res) => {
   ) {
     throw new ApiError(400, "All fields are required");
   }
-  user.panImg = []
-  user.aadharImg =[]
+  user.panImg = [];
+  user.aadharImg = [];
   user.panImg.push(panImg1Url, panImg2Url);
   user.aadharImg.push(aadharImgName1Url, aadharImgName2Url);
   //   console.log(user)
@@ -89,4 +89,59 @@ const checkPanAadhar = asyncHandler(async (req, res) => {
     );
 });
 
-export { addPanAadhar, checkPanAadhar };
+const getApprovalRequests = asyncHandler(async (req, res) => {
+  const admin = await User.findById(req.user);
+
+  if (!admin || admin.role !== "admin") {
+    throw new ApiError(403, "You are not authorized to access this resource");
+  }
+
+  // Fetch users whose 'approved' is 'waiting' and have either 'pan' or 'aadhar'
+  const pendingUsers = await User.find({
+    approved: "waiting",
+    $or: [
+      { pan: { $exists: true, $ne: null } },
+      { aadhar: { $exists: true, $ne: null } },
+    ],
+  }).select("-password");
+
+  return res
+    .status(200)
+    .json(
+      new ApiResponse(
+        200,
+        pendingUsers,
+        pendingUsers.length <= 0
+          ? `No requests for Approval`
+          : "Approval requests fetched successfully",
+      ),
+    );
+});
+
+const approveUser = asyncHandler(async (req, res) => {
+  const { userId } = req.body;
+  // console.log('user id is',userId)
+
+  const admin = await User.findById(req.user);
+
+  if (!admin || admin.role !== "admin") {
+    throw new ApiError(403, "You are not authorized to perform this action");
+  }
+  // console.log("admin id is", admin._id);
+
+  const user = await User.findById(userId);
+
+  if (!user) {
+    throw new ApiError(404, "User not found");
+  }
+
+  user.approved = "approved";
+  user.approvedBy = admin._id;
+  await user.save();
+
+  return res
+    .status(200)
+    .json(new ApiResponse(200, user, "User has been approved successfully"));
+});
+
+export { addPanAadhar, checkPanAadhar, getApprovalRequests, approveUser };

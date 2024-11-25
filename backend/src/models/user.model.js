@@ -57,6 +57,15 @@ const userSchema = new mongoose.Schema(
         ref: "SchemePurchase",
       },
     ],
+    approved: {
+      type: String,
+      enum: ["waiting", "approved"],
+      default: "waiting",
+    },
+    approvedBy: {
+      type: mongoose.Schema.Types.ObjectId,
+      ref: "User",
+    },
   },
   {
     timestamps: true,

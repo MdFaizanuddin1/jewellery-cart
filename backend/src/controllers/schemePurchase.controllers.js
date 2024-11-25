@@ -7,7 +7,7 @@ import { SchemePurchase } from "../models/schemePurchase.model.js";
 
 const subscribe = asyncHandler(async (req, res) => {
   const { schemeId } = req.params;
-  const { amount, quantity } = req.body;
+  const { amount } = req.body;
   const userId = req.user._id;
   if (!userId) {
     throw new ApiError(404, "you are not authorized");
@@ -27,7 +27,6 @@ const subscribe = asyncHandler(async (req, res) => {
 
   const purchasedScheme = await SchemePurchase.create({
     amount,
-    quantity: quantity,
     purchasedBy: user._id,
     scheme: scheme._id,
   });
@@ -71,7 +70,6 @@ const getAllSubscribers = asyncHandler(async (req, res) => {
   schemes.map((scheme) =>
     scheme.subscribedBy.map((ele) => subscribedBy.push(ele)),
   );
-  
 
   // console.log("subscribedBy is", subscribedBy)
   // " const subscribers = [];
