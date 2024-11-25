@@ -20,23 +20,29 @@ const schemePurchaseSchema = new mongoose.Schema(
       type: Date,
       default: Date.now,
     },
+    nextDueDate: {
+      type: Date,
+    },
     amount: {
       type: Number,
       required: true,
     },
-    // aadhar: {
-    //   type: String,
-    //   required: true,
-    // },
-    // pan: {
-    //   type: String,
-    //   required: true,
-    // },
   },
   {
     timestamps: true,
   },
 );
+
+// Add a pre-save hook to calculate nextDueDate
+schemePurchaseSchema.pre("save", function (next) {
+  if (!this.nextDueDate) {
+    const purchaseDate = this.purchaseDate || new Date();
+    const nextDueDate = new Date(purchaseDate);
+    nextDueDate.setDate(nextDueDate.getDate() + 30); // Add 30 days
+    this.nextDueDate = nextDueDate;
+  }
+  next();
+});
 
 // Create SchemePurchase model
 export const SchemePurchase = mongoose.model(
