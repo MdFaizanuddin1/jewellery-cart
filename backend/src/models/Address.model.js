@@ -2,38 +2,31 @@ import mongoose from "mongoose";
 
 const AddressSchema = new mongoose.Schema(
   {
-    countryCode: {
-      type: String,
-      required: true,
-    },
-    firstName: {
-      type: String,
-      required: true,
-    },
-    lastName: {
+    name: {
       type: String,
       required: true,
     },
     phone: {
-      type: String,
+      type: Number,
       required: true,
     },
-    address1: {
+    address: {
       type: String,
       required: true,
-    },
-    address2: {
-      type: String,
     },
     city: {
       type: String,
       required: true,
     },
-    zone: {
+    pinCode: {
       type: String,
       required: true,
     },
-    pinCode: {
+    state: {
+      type: String,
+      required: true,
+    },
+    country: {
       type: String,
       required: true,
     },
@@ -44,7 +37,7 @@ const AddressSchema = new mongoose.Schema(
   },
   {
     timestamps: true,
-  }
+  },
 );
 
 export const Address = mongoose.model("Address", AddressSchema);

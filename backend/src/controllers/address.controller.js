@@ -19,44 +19,24 @@ const addAddress = asyncHandler(async (req, res) => {
     throw new ApiError(404, "User not found");
   }
 
-  const {
-    countryCode,
-    firstName,
-    lastName,
-    phone,
-    address1,
-    address2,
-    city,
-    zone,
-    pinCode,
-  } = req.body;
+  const { name, phone, address, pinCode, city, state, country } = req.body;
 
   if (
-    [
-      countryCode,
-      firstName,
-      lastName,
-      phone,
-      address1,
-      city,
-      zone,
-      pinCode,
-    ].some((field) => field.trim() === "")
+    [name, phone, address, pinCode, city, state, country].some(
+      (field) => field.trim() === "",
+    )
   ) {
     throw new ApiError(400, "All fields are required");
   }
-  address2.trim();
 
   const savedAddress = await Address.create({
-    countryCode,
-    firstName,
-    lastName,
+    name,
     phone,
-    address1,
-    address2,
-    city,
-    zone,
+    address,
     pinCode,
+    city,
+    state,
+    country,
     user: user._id,
   });
 
@@ -169,15 +149,13 @@ const editSingleAddress = asyncHandler(async (req, res) => {
 
   // Update only the fields that are provided in the request body
   const updatedFields = {};
-  if (req.body.countryCode) updatedFields.countryCode = req.body.countryCode;
-  if (req.body.firstName) updatedFields.firstName = req.body.firstName;
-  if (req.body.lastName) updatedFields.lastName = req.body.lastName;
+  if (req.body.name) updatedFields.name = req.body.name;
   if (req.body.phone) updatedFields.phone = req.body.phone;
-  if (req.body.address1) updatedFields.address1 = req.body.address1;
-  if (req.body.address2) updatedFields.address2 = req.body.address2;
-  if (req.body.city) updatedFields.city = req.body.city;
-  if (req.body.zone) updatedFields.zone = req.body.zone;
+  if (req.body.address) updatedFields.address = req.body.address;
   if (req.body.pinCode) updatedFields.pinCode = req.body.pinCode;
+  if (req.body.city) updatedFields.city = req.body.city;
+  if (req.body.state) updatedFields.state = req.body.state;
+  if (req.body.country) updatedFields.country = req.body.country;
 
   // Update the address with only the provided fields
   const updatedAddress = await Address.findByIdAndUpdate(
