@@ -37,7 +37,7 @@ const subscribe = asyncHandler(async (req, res) => {
     throw new ApiError(500, "Error while purchasing scheme");
   }
 
-  user.subscribedSchemes = purchasedSchemeDb._id;
+  user.subscribedSchemes.push(purchasedSchemeDb._id);
   await user.save();
 
   scheme.subscribedBy.push(user._id);
