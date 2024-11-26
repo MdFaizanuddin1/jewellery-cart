@@ -27,7 +27,8 @@ const options = {
 };
 
 const registerUser = asyncHandler(async (req, res) => {
-  const { userName, email, password, role, fullName, referralCode } = req.body;
+  const { userName, email, password, role, fullName, referralCode, phone } =
+    req.body;
   // console.log(req.body);
 
   if (
@@ -53,6 +54,10 @@ const registerUser = asyncHandler(async (req, res) => {
   // Include `role` only if it exists in the request body
   if (role) {
     userData.role = role;
+  }
+
+  if (phone) {
+    userData.phone = phone;
   }
 
   const user = await User.create(userData);
@@ -253,6 +258,55 @@ const generateReferralCode = asyncHandler(async (req, res) => {
     .status(200)
     .json(new ApiResponse(200, user.referralCode, "Referral code"));
 });
+
+const editUser = asyncHandler(async (req, res) => {
+  const { userName, fullName, phone } = req.body;
+
+  if (!req.user) {
+    throw new ApiError(404, "You are not logged In");
+  }
+  const userId = req.user._id;
+
+  // Check if fields are provided
+  if (!userName && !fullName && !phone) {
+    throw new ApiError(
+      400,
+      "At least one field (userName, fullName, phone) must be provided",
+    );
+  }
+
+  // Find the user by ID
+  const user = await User.findById(userId);
+  if (!user) {
+    throw new ApiError(404, "User not found");
+  }
+
+  // Validate uniqueness of `userName` if it's being updated
+  if (userName && userName !== user.userName) {
+    const existingUser = await User.findOne({ userName });
+    if (existingUser) {
+      throw new ApiError(409, "Username is already taken");
+    }
+    user.userName = userName;
+  }
+
+  // Update fields if provided
+  if (fullName) user.fullName = fullName;
+  if (phone) user.phone = phone;
+
+  // Save the updated user
+  const updatedUser = await user.save();
+
+  // Respond with the updated user data (excluding sensitive fields)
+  const responseUser = await User.findById(updatedUser._id).select(
+    "-password -refreshToken",
+  );
+
+  return res
+    .status(200)
+    .json(new ApiResponse(200, responseUser, "User updated successfully"));
+});
+
 export {
   registerUser,
   loginUser,
@@ -263,4 +317,5 @@ export {
   getReferredUsers,
   getReferrer,
   generateReferralCode,
+  editUser,
 };

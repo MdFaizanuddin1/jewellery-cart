@@ -80,6 +80,9 @@ const userSchema = new mongoose.Schema(
         ref: "User",
       },
     ],
+    phone: {
+      type: Number,
+    },
   },
   {
     timestamps: true,

@@ -1,6 +1,7 @@
 import { Router } from "express";
 import {
   changeCurrentPassword,
+  editUser,
   generateReferralCode,
   getAllUser,
   getCurrentUser,
@@ -24,5 +25,6 @@ router.get("/getAllUser", verifyJWT, getAllUser);
 router.get("/getReferredUsers", verifyJWT, getReferredUsers);
 router.get("/getReferrer", verifyJWT, getReferrer);
 router.get("/generateReferralCode", verifyJWT, generateReferralCode);
+router.put("/edit", verifyJWT, editUser);
 
 export default router;
