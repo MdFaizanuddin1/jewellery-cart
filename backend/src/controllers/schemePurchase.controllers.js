@@ -31,7 +31,9 @@ const subscribe = asyncHandler(async (req, res) => {
     scheme: scheme._id,
   });
 
-  const purchasedSchemeDb = await SchemePurchase.findById(purchasedScheme._id); // this is coming from db
+  const purchasedSchemeDb = await SchemePurchase.findById(purchasedScheme._id)
+    .populate("purchasedBy", "_id userName email phone")
+    .populate("scheme", "_id name"); // this is coming from db
   if (!purchasedSchemeDb) {
     throw new ApiError(500, "Error while purchasing scheme");
   }
