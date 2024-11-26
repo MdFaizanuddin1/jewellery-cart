@@ -181,11 +181,17 @@ const getUserSubscribedSchemes = asyncHandler(async (req, res) => {
     throw new ApiError(404, "User not found");
   }
 
-  return res.status(200).json({
-    status: 200,
-    data: user.subscribedSchemes,
-    message: "Subscribed schemes retrieved successfully",
-  });
+  return res
+    .status(200)
+    .json(
+      new ApiResponse(
+        200,
+        user.subscribedSchemes ? user.subscribedSchemes : {},
+        user.subscribedSchemes.length > 0
+          ? `Total Subscribed schemes is ${user.subscribedSchemes.length} retrieved successfully`
+          : "user is not subscribed to any schemes",
+      ),
+    );
 });
 
 const getSchemeSubscribers = asyncHandler(async (req, res) => {
@@ -199,7 +205,7 @@ const getSchemeSubscribers = asyncHandler(async (req, res) => {
   const scheme = await Scheme.findById(schemeId)
     .populate({
       path: "subscribedBy", // Assuming `subscribedBy` is the field in the `Scheme` model
-      select: "fullName email phone", // Include user-specific fields
+      select: "_id fullName email phone", // Include user-specific fields
     })
     .select("name description subscribedBy");
 
@@ -207,11 +213,17 @@ const getSchemeSubscribers = asyncHandler(async (req, res) => {
     throw new ApiError(404, "Scheme not found");
   }
 
-  return res.status(200).json({
-    status: 200,
-    data: scheme.subscribedBy,
-    message: "Subscribers retrieved successfully",
-  });
+  return res
+    .status(200)
+    .json(
+      new ApiResponse(
+        200,
+        scheme.subscribedBy,
+        scheme.subscribedBy.length > 0
+          ? `Subscribers retrieved successfully total ${scheme.subscribedBy.length} subscribers`
+          : "No subscribers found",
+      ),
+    );
 });
 
 export {
