@@ -27,7 +27,7 @@ const options = {
 };
 
 const registerUser = asyncHandler(async (req, res) => {
-  const { userName, email, password, role, fullName } = req.body;
+  const { userName, email, password, role, fullName, referralCode } = req.body;
   // console.log(req.body);
 
   if (
@@ -56,6 +56,20 @@ const registerUser = asyncHandler(async (req, res) => {
   }
 
   const user = await User.create(userData);
+
+  // Handle referral code if provided
+  if (referralCode) {
+    const referrer = await User.findOne({ referralCode });
+    if (!referrer) {
+      throw new ApiError(400, "Invalid referral code");
+    }
+    user.referredBy = referrer._id;
+
+    // Add this user to the referrer's referredUsers list
+    referrer.referredUsers.push(user._id);
+    await referrer.save();
+  }
+  await user.save();
 
   const createdUser = await User.findById(user._id).select(
     "-password -refreshToken",
@@ -190,6 +204,55 @@ const getAllUser = asyncHandler(async (req, res) => {
     );
 });
 
+const getReferredUsers = asyncHandler(async (req, res) => {
+  const user = await User.findById(req.user._id).populate(
+    "referredUsers",
+    "fullName email userName",
+  );
+
+  if (!user) {
+    throw new ApiError(404, "User not found");
+  }
+
+  res
+    .status(200)
+    .json(
+      new ApiResponse(
+        200,
+        user.referredUsers,
+        "Referred users fetched successfully",
+      ),
+    );
+});
+const getReferrer = asyncHandler(async (req, res) => {
+  const user = await User.findById(req.user._id).populate(
+    "referredBy",
+    "fullName email userName",
+  );
+
+  if (!user) {
+    throw new ApiError(404, "User not found");
+  }
+  res
+    .status(200)
+    .json(
+      new ApiResponse(
+        200,
+        user.referredBy ? user.referredBy : {},
+        user.referredBy ? "fetched the referer" : "There is no referer",
+      ),
+    );
+});
+const generateReferralCode = asyncHandler(async (req, res) => {
+  const user = await User.findById(req.user._id);
+  if (!user) {
+    throw new ApiError(404, "User does not exists");
+  }
+  await user.save();
+  return res
+    .status(200)
+    .json(new ApiResponse(200, user.referralCode, "Referral code"));
+});
 export {
   registerUser,
   loginUser,
@@ -197,4 +260,7 @@ export {
   changeCurrentPassword,
   getCurrentUser,
   getAllUser,
+  getReferredUsers,
+  getReferrer,
+  generateReferralCode,
 };

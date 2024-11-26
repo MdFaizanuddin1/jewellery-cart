@@ -66,6 +66,20 @@ const userSchema = new mongoose.Schema(
       type: mongoose.Schema.Types.ObjectId,
       ref: "User",
     },
+    referredBy: {
+      type: mongoose.Schema.Types.ObjectId, // Reference to the User who referred this user
+      ref: "User",
+    },
+    referralCode: {
+      type: String, // Unique code generated for each user
+      unique: true,
+    },
+    referredUsers: [
+      {
+        type: mongoose.Schema.Types.ObjectId, // List of users referred by this user
+        ref: "User",
+      },
+    ],
   },
   {
     timestamps: true,
@@ -97,6 +111,15 @@ userSchema.methods.token = function () {
     { expiresIn: process.env.TOKEN_EXPIRY },
   );
 };
+
+// Generate a unique referral code on user creation
+userSchema.pre("save", function (next) {
+  if (!this.referralCode) {
+    // this.referralCode = this._id.toString().slice(-6) + Math.random().toString(36).substring(2, 8); // Generate a simple unique code
+    this.referralCode = this._id.toString().slice(-8); // Generate a simple unique code
+  }
+  next();
+});
 
 // Create User model
 export const User = mongoose.model("User", userSchema);
