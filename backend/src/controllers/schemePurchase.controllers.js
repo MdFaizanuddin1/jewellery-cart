@@ -150,7 +150,67 @@ const getAllSubscribers = asyncHandler(async (req, res) => {
     );
 });
 
+const getUserSubscribedSchemes = asyncHandler(async (req, res) => {
+  const userId = req.user._id;
 
+  // Find the user and populate their subscribed schemes
+  // const user = await User.findById(userId)
+  //   .populate({
+  //     path: "subscribedSchemes",
+  //     populate: {
+  //       path: "scheme", // Assuming `scheme` is a field in the `SchemePurchase` model
+  //       select: "name description", // Include scheme-specific fields
+  //     },
+  //   })
+  //   .select("fullName email subscribedSchemes");
+
+  const user = await User.findById(userId)
+    .populate({
+      path: "subscribedSchemes",
+      select: "amount nextDueDate", // Include nextDueDate and other fields from SchemePurchase
+      populate: {
+        path: "scheme", // Populate the scheme details
+        select: "name description", // Include specific fields from the Scheme model
+      },
+    })
+    .select("fullName email subscribedSchemes"); // Include basic user details
+
+  if (!user) {
+    throw new ApiError(404, "User not found");
+  }
+
+  return res.status(200).json({
+    status: 200,
+    data: user.subscribedSchemes,
+    message: "Subscribed schemes retrieved successfully",
+  });
+});
+
+const getSchemeSubscribers = asyncHandler(async (req, res) => {
+  const { schemeId } = req.params; // Assuming schemeId is passed as a route parameter
+
+  if (req.user.role != "admin") {
+    throw new ApiError(404, "only admin can access");
+  }
+
+  // Find the scheme and populate its subscribers
+  const scheme = await Scheme.findById(schemeId)
+    .populate({
+      path: "subscribedBy", // Assuming `subscribedBy` is the field in the `Scheme` model
+      select: "fullName email phone", // Include user-specific fields
+    })
+    .select("name description subscribedBy");
+
+  if (!scheme) {
+    throw new ApiError(404, "Scheme not found");
+  }
+
+  return res.status(200).json({
+    status: 200,
+    data: scheme.subscribedBy,
+    message: "Subscribers retrieved successfully",
+  });
+});
 
 export {
   subscribe,
