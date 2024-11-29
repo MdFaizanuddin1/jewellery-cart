@@ -78,7 +78,7 @@ const deleteAll = asyncHandler(async (req, res) => {
     const imagePath = path.join(
       __dirname,
       "../../public/temp",
-      path.basename(imageUrl),
+      path.basename(imageUrl)
     ); // Adjust path to 'uploads' folder
     // console.log(imagePath)
 
@@ -104,8 +104,8 @@ const deleteAll = asyncHandler(async (req, res) => {
       new ApiResponse(
         200,
         deleted.deletedCount,
-        "All schemes and associated images deleted successfully",
-      ),
+        "All schemes and associated images deleted successfully"
+      )
     );
 });
 
@@ -145,7 +145,7 @@ const deleteOne = asyncHandler(async (req, res) => {
   const imagePath = path.join(
     __dirname,
     "../../public/temp",
-    path.basename(imageUrl),
+    path.basename(imageUrl)
   ); // Adjust path to 'uploads' folder
   // console.log(imagePath)
 
@@ -168,7 +168,8 @@ const deleteOne = asyncHandler(async (req, res) => {
 
 const editScheme = asyncHandler(async (req, res) => {
   const { schemeId } = req.params;
-  const { name, description, schemeType, minAmount, maxAmount } = req.body;
+  const { name, description, schemeType, minAmount, maxAmount, duration } =
+    req.body;
   const newImage = req.file; // New image if provided
 
   // Retrieve the existing scheme
@@ -188,7 +189,7 @@ const editScheme = asyncHandler(async (req, res) => {
     oldImagePath = path.join(
       __dirname,
       "../../public/temp",
-      path.basename(oldImageUrl),
+      path.basename(oldImageUrl)
     ); // Get old image file path
 
     // Delete the old image file
@@ -211,6 +212,7 @@ const editScheme = asyncHandler(async (req, res) => {
   scheme.schemeType = schemeType || scheme.schemeType;
   scheme.maxAmount = maxAmount || scheme.maxAmount;
   scheme.minAmount = minAmount || scheme.minAmount;
+  scheme.duration = duration || scheme.duration;
 
   // Save the updated scheme
   const updatedScheme = await scheme.save();

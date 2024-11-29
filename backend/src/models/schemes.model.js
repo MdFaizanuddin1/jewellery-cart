@@ -37,8 +37,12 @@ const schemeSchema = Schema(
         ref: "User",
       },
     ],
+    duration: {
+      type: String,
+      default: "11 months",
+    },
   },
-  { timestamps: true },
+  { timestamps: true }
 );
 
 export const Scheme = mongoose.model("Scheme", schemeSchema);
