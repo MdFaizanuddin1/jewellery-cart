@@ -1,2 +1,4 @@
 backend/.env
 backend/node_modules
+backend/public/temp
+.DS_Store

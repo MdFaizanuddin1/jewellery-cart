@@ -23,7 +23,7 @@ const addAddress = asyncHandler(async (req, res) => {
 
   if (
     [name, phone, address, pinCode, city, state, country].some(
-      (field) => field.trim() === "",
+      (field) => field.trim() === ""
     )
   ) {
     throw new ApiError(400, "All fields are required");
@@ -109,21 +109,40 @@ const getSingleAddress = asyncHandler(async (req, res) => {
 const deleteAddress = asyncHandler(async (req, res) => {
   const { addressId } = req.params;
 
+  const user = await User.findById(req.user._id);
+  if (!user) {
+    throw new ApiError(404, "You are not authorized");
+  }
+
   // Validate addressId
   if (!mongoose.Types.ObjectId.isValid(addressId)) {
     throw new ApiError(404, "Invalid Address ID");
   }
 
-  // Delete address by ID
-  const address = await Address.findByIdAndDelete(addressId);
-
+  const address = await Address.findById(addressId);
   if (!address) {
     throw new ApiError(404, "Address not found");
   }
 
+  if (address.user.toString() !== user._id.toString()) {
+    throw new ApiError(404, "user id is not matching with address user id");
+  }
+
+  // Delete address by ID
+  const addressDeleted = await Address.findByIdAndDelete(addressId);
+
+  if (!addressDeleted) {
+    throw new ApiError(404, "Address not found");
+  }
+
+  user.address = user.address.filter(
+    (addrId) => addrId.toString() !== addressId
+  );
+  await user.save();
+
   return res
     .status(200)
-    .send(new ApiResponse(200, null, "Address deleted successfully"));
+    .send(new ApiResponse(200, addressDeleted, "Address deleted successfully"));
 });
 
 const editSingleAddress = asyncHandler(async (req, res) => {
@@ -161,7 +180,7 @@ const editSingleAddress = asyncHandler(async (req, res) => {
   const updatedAddress = await Address.findByIdAndUpdate(
     addressId,
     { $set: updatedFields }, // Only update the fields that were passed
-    { new: true, runValidators: true }, // Return the updated document
+    { new: true, runValidators: true } // Return the updated document
   );
 
   if (!updatedAddress) {
@@ -193,8 +212,8 @@ const checkUserHasAddress = asyncHandler(async (req, res) => {
       new ApiResponse(
         200,
         addresses,
-        `addresses fetched successfully, user has ${addresses.length} in Db`,
-      ),
+        `addresses fetched successfully, user has ${addresses.length} in Db`
+      )
     );
 });
 
