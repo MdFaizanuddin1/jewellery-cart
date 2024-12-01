@@ -24,7 +24,7 @@ import addressRouter from "./routes/address.routes.js";
 import schemeRouter from "./routes/scheme.routes.js";
 import kycRouter from "./routes/panAadhar.routes.js";
 import schemePurchaseRouter from "./routes/schemePurchase.routes.js";
-// import priceRouter from "./routes/goldSilverPrice.routes.js";
+import priceRouter from "./routes/goldSilverPrice.routes.js";
 import razorPayRouter from "./routes/razor.routes.js";
 
 //routes declaration
@@ -34,7 +34,7 @@ app.use("/api/v1/address", addressRouter);
 app.use("/api/v1/scheme", schemeRouter);
 app.use("/api/v1/kyc", kycRouter);
 app.use("/api/v1/purchase", schemePurchaseRouter);
-// app.use("/api/v1/price", priceRouter);
+app.use("/api/v1/price", priceRouter);
 app.use("/api/v1/razor", razorPayRouter);
 
 export { app };
