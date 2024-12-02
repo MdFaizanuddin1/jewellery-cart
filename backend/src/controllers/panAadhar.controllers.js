@@ -21,7 +21,9 @@ const addPanAadhar = asyncHandler(async (req, res) => {
   //   console.log(user)
 
   if (user.pan || user.aadhar) {
-    throw new ApiError(400, "user already has pan and aadhar");
+    return res
+      .status(200)
+      .json(new ApiResponse(200, user, "user already has pan and aadhar"));
   }
 
   user.pan = pan;
@@ -42,7 +44,7 @@ const addPanAadhar = asyncHandler(async (req, res) => {
 
   if (
     [aadharImgName1Url, aadharImgName2Url, panImg1Url, panImg2Url].some(
-      (ele) => ele.trim() === "",
+      (ele) => ele.trim() === ""
     )
   ) {
     throw new ApiError(400, "All fields are required");
@@ -57,7 +59,7 @@ const addPanAadhar = asyncHandler(async (req, res) => {
   return res
     .status(200)
     .json(
-      new ApiResponse(200, user, "aadhar and pan details saved successfully"),
+      new ApiResponse(200, user, "aadhar and pan details saved successfully")
     );
 });
 
@@ -84,8 +86,8 @@ const checkPanAadhar = asyncHandler(async (req, res) => {
       new ApiResponse(
         200,
         dbUser,
-        "User has pan and address stored successfully",
-      ),
+        "User has pan and address stored successfully"
+      )
     );
 });
 
@@ -113,8 +115,8 @@ const getApprovalRequests = asyncHandler(async (req, res) => {
         pendingUsers,
         pendingUsers.length <= 0
           ? `No requests for Approval`
-          : "Approval requests fetched successfully",
-      ),
+          : "Approval requests fetched successfully"
+      )
     );
 });
 
