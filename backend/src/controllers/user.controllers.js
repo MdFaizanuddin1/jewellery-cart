@@ -2,9 +2,6 @@ import { User } from "../models/user.model.js";
 import { ApiError } from "../utils/apiError.js";
 import { ApiResponse } from "../utils/apiResponse.js";
 import { asyncHandler } from "../utils/asyncHandler.js";
-import dotenv from "dotenv";
-dotenv.config();
-import twilio from "twilio";
 import { sendOtp, verifyOtp } from "../utils/twilio.js";
 
 const generateTokens = async (userId) => {
@@ -29,12 +26,6 @@ const options = {
   httpOnly: true,
   secure: true,
 };
-
-// Twilio Configuration
-const accountSid = process.env.TWILIO_ACCOUNT_SID;
-const authToken = process.env.TWILIO_AUTH_TOKEN;
-const serviceSid = process.env.TWILIO_SERVICE_SID; // Optional, if using Verify API
-const client = twilio(accountSid, authToken);
 
 const registerUser = asyncHandler(async (req, res) => {
   const { userName, email, password, role, fullName, referralCode, phone } =
