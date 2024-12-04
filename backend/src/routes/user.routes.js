@@ -8,8 +8,10 @@ import {
   getReferredUsers,
   getReferrer,
   loginUser,
+  loginWithOtp,
   logoutUser,
   registerUser,
+  sendOtp,
 } from "../controllers/user.controllers.js";
 import { verifyJWT } from "../middlewares/userAuth.middlewares.js";
 
@@ -26,5 +28,7 @@ router.get("/getReferredUsers", verifyJWT, getReferredUsers);
 router.get("/getReferrer", verifyJWT, getReferrer);
 router.get("/generateReferralCode", verifyJWT, generateReferralCode);
 router.put("/edit", verifyJWT, editUser);
+router.put("/sendOtp", sendOtp);
+router.put("/loginOtp", loginWithOtp);
 
 export default router;

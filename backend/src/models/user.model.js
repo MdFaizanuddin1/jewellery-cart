@@ -13,7 +13,7 @@ const userSchema = new mongoose.Schema(
       type: String,
       required: true,
       trim: true,
-      unique: true
+      unique: true,
     },
     email: {
       type: String,
@@ -87,7 +87,7 @@ const userSchema = new mongoose.Schema(
   },
   {
     timestamps: true,
-  },
+  }
 );
 
 userSchema.pre("save", async function (next) {
@@ -110,9 +110,10 @@ userSchema.methods.token = function () {
       email: this.email,
       userName: this.userName,
       fullName: this.fullName,
+      phone: this.phone,
     },
     process.env.TOKEN_SECRET,
-    { expiresIn: process.env.TOKEN_EXPIRY },
+    { expiresIn: process.env.TOKEN_EXPIRY }
   );
 };
 

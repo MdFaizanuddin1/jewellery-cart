@@ -16,7 +16,7 @@ const generateTokens = async (userId) => {
   } catch (error) {
     throw new ApiError(
       500,
-      "Something went wrong while generating refresh and access token",
+      "Something went wrong while generating refresh and access token"
     );
   }
 };
@@ -38,10 +38,13 @@ const registerUser = asyncHandler(async (req, res) => {
   }
 
   const existedUser = await User.findOne({
-    $or: [{ userName }, { email }],
+    $or: [{ userName }, { email }, { phone }],
   });
   if (existedUser) {
-    throw new ApiError(409, "User with email or userName already exists");
+    throw new ApiError(
+      409,
+      "User with phone number , email or userName already exists"
+    );
   }
 
   const userData = {
@@ -77,26 +80,27 @@ const registerUser = asyncHandler(async (req, res) => {
   await user.save();
 
   const createdUser = await User.findById(user._id).select(
-    "-password -refreshToken",
+    "-password -refreshToken"
   );
 
   if (!createdUser) {
     throw new ApiError(500, "something went wrong while registering user");
   }
 
+  const token = await generateTokens(createdUser._id);
+
   return res
     .status(201)
-    .json(new ApiResponse(200, createdUser, "User registered successfully"));
+    .json(
+      new ApiResponse(
+        200,
+        { user: createdUser, token },
+        "User registered successfully"
+      )
+    );
 });
 
 const loginUser = asyncHandler(async (req, res) => {
-  // req body ->data
-  //user details match karo database - userName or email
-  //find the user
-  //check password
-  //access token refresh token generate
-  //send cookie
-
   const { email, password } = req.body;
 
   //console.log(email);
@@ -134,8 +138,8 @@ const loginUser = asyncHandler(async (req, res) => {
           user: loggedInUser,
           token,
         },
-        "User logged In Successfully",
-      ),
+        "User logged In Successfully"
+      )
     );
 });
 
@@ -149,7 +153,7 @@ const logoutUser = asyncHandler(async (req, res) => {
     },
     {
       new: true,
-    },
+    }
   );
   const options = {
     httpOnly: true,
@@ -204,15 +208,15 @@ const getAllUser = asyncHandler(async (req, res) => {
         users,
         users.length > 0
           ? `Total ${users.length} users fetched successfully`
-          : "No users found",
-      ),
+          : "No users found"
+      )
     );
 });
 
 const getReferredUsers = asyncHandler(async (req, res) => {
   const user = await User.findById(req.user._id).populate(
     "referredUsers",
-    "fullName email userName",
+    "fullName email userName"
   );
 
   if (!user) {
@@ -225,14 +229,14 @@ const getReferredUsers = asyncHandler(async (req, res) => {
       new ApiResponse(
         200,
         user.referredUsers,
-        "Referred users fetched successfully",
-      ),
+        "Referred users fetched successfully"
+      )
     );
 });
 const getReferrer = asyncHandler(async (req, res) => {
   const user = await User.findById(req.user._id).populate(
     "referredBy",
-    "fullName email userName",
+    "fullName email userName"
   );
 
   if (!user) {
@@ -244,8 +248,8 @@ const getReferrer = asyncHandler(async (req, res) => {
       new ApiResponse(
         200,
         user.referredBy ? user.referredBy : {},
-        user.referredBy ? "fetched the referer" : "There is no referer",
-      ),
+        user.referredBy ? "fetched the referer" : "There is no referer"
+      )
     );
 });
 const generateReferralCode = asyncHandler(async (req, res) => {
@@ -271,7 +275,7 @@ const editUser = asyncHandler(async (req, res) => {
   if (!userName && !fullName && !phone) {
     throw new ApiError(
       400,
-      "At least one field (userName, fullName, phone) must be provided",
+      "At least one field (userName, fullName, phone) must be provided"
     );
   }
 
@@ -299,12 +303,81 @@ const editUser = asyncHandler(async (req, res) => {
 
   // Respond with the updated user data (excluding sensitive fields)
   const responseUser = await User.findById(updatedUser._id).select(
-    "-password -refreshToken",
+    "-password -refreshToken"
   );
 
   return res
     .status(200)
     .json(new ApiResponse(200, responseUser, "User updated successfully"));
+});
+
+const sendOtp = asyncHandler(async (req, res) => {
+  const { phone } = req.body;
+  //   console.log("phone is", phone);
+
+  // Validation
+  if (!phone) {
+    return res.status(400).json({ message: "Phone number is required." });
+  }
+
+  // Send OTP
+  const verification = await client.verify.v2
+    .services(serviceSid)
+    .verifications.create({
+      to: phone,
+      channel: "sms", // or 'call'
+    });
+  console.log("verfication is ", verification);
+
+  res
+    .status(200)
+    .json({ message: "OTP sent successfully!", data: verification });
+});
+
+const loginWithOtp = asyncHandler(async (req, res) => {
+  const { phone, otp } = req.body;
+  if (!phone || !otp) {
+    throw new ApiError(400, "Phone and OTP are required.");
+  }
+
+  // Verify OTP via Twilio
+  let verificationCheck;
+  try {
+    verificationCheck = await client.verify.v2
+      .services(serviceSid)
+      .verificationChecks.create({
+        to: phone,
+        code: otp,
+      });
+  } catch (error) {
+    throw new ApiError(500, "Failed to verify OTP. Please try again.");
+  }
+
+  if (verificationCheck.status !== "approved") {
+    throw new ApiError(401, "Invalid OTP.");
+  }
+
+  const user = await User.findOne({ phone });
+  if (!user) {
+    throw new ApiError(404, "User not found.");
+  }
+  const token = await generateTokens(user._id);
+
+  const loggedInUser = await User.findById(user._id).select("-password");
+
+  return res
+    .status(200)
+    .cookie("token", token, options)
+    .json(
+      new ApiResponse(
+        200,
+        {
+          user: loggedInUser,
+          token,
+        },
+        "User logged In Successfully"
+      )
+    );
 });
 
 export {
@@ -318,4 +391,6 @@ export {
   getReferrer,
   generateReferralCode,
   editUser,
+  sendOtp,
+  loginWithOtp,
 };
