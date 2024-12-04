@@ -2,9 +2,10 @@ import { User } from "../models/user.model.js";
 import { ApiError } from "../utils/apiError.js";
 import { ApiResponse } from "../utils/apiResponse.js";
 import { asyncHandler } from "../utils/asyncHandler.js";
-import dotenv from 'dotenv'
-dotenv.config()
-import twilio from 'twilio'
+import dotenv from "dotenv";
+dotenv.config();
+import twilio from "twilio";
+import { sendOtp, verifyOtp } from "../utils/twilio.js";
 
 const generateTokens = async (userId) => {
   try {
@@ -320,7 +321,7 @@ const editUser = asyncHandler(async (req, res) => {
     .json(new ApiResponse(200, responseUser, "User updated successfully"));
 });
 
-const sendOtp = asyncHandler(async (req, res) => {
+const sendOtpController = asyncHandler(async (req, res) => {
   const { phone } = req.body;
   //   console.log("phone is", phone);
 
@@ -330,17 +331,12 @@ const sendOtp = asyncHandler(async (req, res) => {
   }
 
   // Send OTP
-  const verification = await client.verify.v2
-    .services(serviceSid)
-    .verifications.create({
-      to: phone,
-      channel: "sms", // or 'call'
-    });
-  console.log("verfication is ", verification);
+  const verification = await sendOtp(phone);
+  // console.log("verfication is ", verification);
 
   res
     .status(200)
-    .json({ message: "OTP sent successfully!", data: verification });
+    .json(new ApiResponse(200, verification, "OTP sent successfully!"));
 });
 
 const loginWithOtp = asyncHandler(async (req, res) => {
@@ -348,19 +344,7 @@ const loginWithOtp = asyncHandler(async (req, res) => {
   if (!phone || !otp) {
     throw new ApiError(400, "Phone and OTP are required.");
   }
-
-  // Verify OTP via Twilio
-  let verificationCheck;
-  try {
-    verificationCheck = await client.verify.v2
-      .services(serviceSid)
-      .verificationChecks.create({
-        to: phone,
-        code: otp,
-      });
-  } catch (error) {
-    throw new ApiError(500, "Failed to verify OTP. Please try again.");
-  }
+  const verificationCheck = await verifyOtp(phone, otp);
 
   if (verificationCheck.status !== "approved") {
     throw new ApiError(401, "Invalid OTP.");
@@ -400,6 +384,6 @@ export {
   getReferrer,
   generateReferralCode,
   editUser,
-  sendOtp,
+  sendOtpController,
   loginWithOtp,
 };
