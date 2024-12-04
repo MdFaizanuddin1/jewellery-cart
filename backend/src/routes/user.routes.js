@@ -28,7 +28,7 @@ router.get("/getReferredUsers", verifyJWT, getReferredUsers);
 router.get("/getReferrer", verifyJWT, getReferrer);
 router.get("/generateReferralCode", verifyJWT, generateReferralCode);
 router.put("/edit", verifyJWT, editUser);
-router.put("/sendOtp", sendOtp);
-router.put("/loginOtp", loginWithOtp);
+router.post("/sendOtp", sendOtp);
+router.post("/loginOtp", loginWithOtp);
 
 export default router;
