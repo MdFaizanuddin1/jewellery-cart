@@ -47,7 +47,7 @@ const subscribe = asyncHandler(async (req, res) => {
   return res
     .status(200)
     .json(
-      new ApiResponse(200, purchasedSchemeDb, "scheme subscribed successfully"),
+      new ApiResponse(200, purchasedSchemeDb, "scheme subscribed successfully")
     );
 });
 
@@ -147,8 +147,8 @@ const getAllSubscribers = asyncHandler(async (req, res) => {
         subscribers.length > 0 ? subscribers : {},
         subscribers.length > 0
           ? `total number of subscribers is ${subscribers.length}`
-          : "No subscribers found",
-      ),
+          : "No subscribers found"
+      )
     );
 });
 
@@ -169,7 +169,7 @@ const getUserSubscribedSchemes = asyncHandler(async (req, res) => {
   const user = await User.findById(userId)
     .populate({
       path: "subscribedSchemes",
-      select: "amount nextDueDate", // Include nextDueDate and other fields from SchemePurchase
+      select: "amount nextDueDate createdAt", // Include nextDueDate and other fields from SchemePurchase
       populate: {
         path: "scheme", // Populate the scheme details
         select: "name description", // Include specific fields from the Scheme model
@@ -189,8 +189,8 @@ const getUserSubscribedSchemes = asyncHandler(async (req, res) => {
         user.subscribedSchemes ? user.subscribedSchemes : {},
         user.subscribedSchemes.length > 0
           ? `Total Subscribed schemes is ${user.subscribedSchemes.length} retrieved successfully`
-          : "user is not subscribed to any schemes",
-      ),
+          : "user is not subscribed to any schemes"
+      )
     );
 });
 
@@ -205,7 +205,7 @@ const getSchemeSubscribers = asyncHandler(async (req, res) => {
   const scheme = await Scheme.findById(schemeId)
     .populate({
       path: "subscribedBy", // Assuming `subscribedBy` is the field in the `Scheme` model
-      select: "_id fullName email phone", // Include user-specific fields
+      select: "_id fullName userName email phone", // Include user-specific fields
     })
     .select("name description subscribedBy");
 
@@ -221,8 +221,8 @@ const getSchemeSubscribers = asyncHandler(async (req, res) => {
         scheme.subscribedBy,
         scheme.subscribedBy.length > 0
           ? `Subscribers retrieved successfully total ${scheme.subscribedBy.length} subscribers`
-          : "No subscribers found",
-      ),
+          : "No subscribers found"
+      )
     );
 });
 
