@@ -92,6 +92,7 @@ const registerUser = asyncHandler(async (req, res) => {
 
   return res
     .status(201)
+    .cookie("token", token, options)
     .json(
       new ApiResponse(
         200,

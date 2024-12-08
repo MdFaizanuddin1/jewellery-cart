@@ -14,6 +14,7 @@ import {
   sendOtpController,
 } from "../controllers/user.controllers.js";
 import { verifyJWT } from "../middlewares/userAuth.middlewares.js";
+import { getUserEarnings,getAllUserEarnings } from "../controllers/referredEarnings.controllers.js";
 
 const router = Router();
 
@@ -30,5 +31,10 @@ router.get("/generateReferralCode", verifyJWT, generateReferralCode);
 router.put("/edit", verifyJWT, editUser);
 router.post("/sendOtp", sendOtpController);
 router.post("/loginOtp", loginWithOtp);
+
+// user referral earnings
+
+router.get('/userEarning', verifyJWT, getUserEarnings)
+router.get('/allUserEarning', verifyJWT, getAllUserEarnings)
 
 export default router;

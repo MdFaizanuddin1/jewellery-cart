@@ -23,10 +23,14 @@ const schemePurchaseSchema = new mongoose.Schema(
       type: Number,
       required: true,
     },
+    commissionCalculated: {
+      type: Boolean,
+      default: false, // Mark if commission has been calculated
+    },
   },
   {
     timestamps: true,
-  },
+  }
 );
 
 // Add a pre-save hook to calculate nextDueDate
@@ -43,5 +47,5 @@ schemePurchaseSchema.pre("save", function (next) {
 // Create SchemePurchase model
 export const SchemePurchase = mongoose.model(
   "SchemePurchase",
-  schemePurchaseSchema,
+  schemePurchaseSchema
 );

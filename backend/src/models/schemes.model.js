@@ -41,6 +41,11 @@ const schemeSchema = Schema(
       type: String,
       default: "11 months",
     },
+    rewardPercentage: {
+      type: Number,
+      required: true,
+      default:0
+    },
   },
   { timestamps: true }
 );

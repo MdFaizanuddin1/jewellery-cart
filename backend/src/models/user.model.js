@@ -85,6 +85,10 @@ const userSchema = new mongoose.Schema(
       type: Number,
       unique: true,
     },
+    referralEarnings: {
+      totalEarnings: { type: Number, default: 0 }, // Total earnings from referrals
+      monthlyEarnings: { type: Number, default: 0 }, // Earnings for the current month
+    },
   },
   {
     timestamps: true,
