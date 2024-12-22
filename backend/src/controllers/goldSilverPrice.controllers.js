@@ -55,11 +55,21 @@ import { Price } from "../models/goldSilverPrice.model.js";
 // };
 // export {getPrice}
 
+// const getPrice = asyncHandler(async (req, res) => {
+//   const price = await Price.find({});
+
+//   if (!price) {
+//     throw new ApiError(500, "Price Not found");
+//   }
+
+//   return res
+//     .status(200)
+//     .json(new ApiResponse(200, price, "price fetched successfully"));
+// });
+
+
 const getPrice = asyncHandler(async (req, res) => {
-  if (req.user.role != "admin") {
-    throw new ApiError(404, "You are not authorized");
-  }
-  const price = await Price.find({});
+  const price = await Price.findOne({}).sort({ createdAt: -1 });
 
   if (!price) {
     throw new ApiError(500, "Price Not found");
@@ -67,7 +77,26 @@ const getPrice = asyncHandler(async (req, res) => {
 
   return res
     .status(200)
-    .json(new ApiResponse(200, price, "price fetched successfully"));
+    .json(new ApiResponse(200, price, "Latest price fetched successfully"));
 });
 
-export { getPrice };
+const setPrice = asyncHandler(async (req, res) => {
+  const { gold, silver } = req.body;
+  if (req.user.role != "admin") {
+    throw new ApiError(404, "You are not authorized");
+  }
+  const price = await Price.create({
+    gold,
+    silver,
+  });
+
+  if (!price) {
+    throw new ApiError(500, "Price creation failed");
+  }
+
+  return res
+    .status(200)
+    .json(new ApiResponse(200, price, "price created successfully"));
+});
+
+export { getPrice ,setPrice};
