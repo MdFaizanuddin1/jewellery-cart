@@ -175,7 +175,7 @@ const getUserSubscribedSchemes = asyncHandler(async (req, res) => {
         select: "name description", // Include specific fields from the Scheme model
       },
     })
-    .select("fullName email subscribedSchemes,approved"); // Include basic user details
+    .select("fullName email subscribedSchemes approved"); // Include basic user details
 
   if (!user) {
     throw new ApiError(404, "User not found");
@@ -186,7 +186,7 @@ const getUserSubscribedSchemes = asyncHandler(async (req, res) => {
     .json(
       new ApiResponse(
         200,
-        user.subscribedSchemes ? user.subscribedSchemes : {},
+        user.subscribedSchemes ? {schemes : user.subscribedSchemes, user} : {},
         user.subscribedSchemes.length > 0
           ? `Total Subscribed schemes is ${user.subscribedSchemes.length} retrieved successfully`
           : "user is not subscribed to any schemes"
