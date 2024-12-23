@@ -175,7 +175,7 @@ const getUserSubscribedSchemes = asyncHandler(async (req, res) => {
         select: "name description", // Include specific fields from the Scheme model
       },
     })
-    .select("fullName email subscribedSchemes"); // Include basic user details
+    .select("fullName email subscribedSchemes,approved"); // Include basic user details
 
   if (!user) {
     throw new ApiError(404, "User not found");
