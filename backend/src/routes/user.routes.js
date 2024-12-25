@@ -5,16 +5,22 @@ import {
   generateReferralCode,
   getAllUser,
   getCurrentUser,
+  getOfflineUsers,
+  getOnlineUsers,
   getReferredUsers,
   getReferrer,
   loginUser,
   loginWithOtp,
   logoutUser,
   registerUser,
+  registerUserOffline,
   sendOtpController,
 } from "../controllers/user.controllers.js";
 import { verifyJWT } from "../middlewares/userAuth.middlewares.js";
-import { getUserEarnings,getAllUserEarnings } from "../controllers/referredEarnings.controllers.js";
+import {
+  getUserEarnings,
+  getAllUserEarnings,
+} from "../controllers/referredEarnings.controllers.js";
 
 const router = Router();
 
@@ -34,7 +40,12 @@ router.post("/loginOtp", loginWithOtp);
 
 // user referral earnings
 
-router.get('/userEarning', verifyJWT, getUserEarnings)
-router.get('/allUserEarning', verifyJWT, getAllUserEarnings)
+router.get("/userEarning", verifyJWT, getUserEarnings);
+router.get("/allUserEarning", verifyJWT, getAllUserEarnings);
+
+// offline - online customers
+router.post("/registerOffline", registerUserOffline);
+router.get("/getAllOnlineUser", verifyJWT, getOnlineUsers);
+router.get("/getAllOfflineUser", verifyJWT, getOfflineUsers);
 
 export default router;

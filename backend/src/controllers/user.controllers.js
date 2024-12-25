@@ -102,6 +102,90 @@ const registerUser = asyncHandler(async (req, res) => {
     );
 });
 
+const registerUserOffline = asyncHandler(async (req, res) => {
+  const {
+    userName,
+    email,
+    password,
+    role,
+    fullName,
+    referralCode,
+    phone,
+    isOffline,
+  } = req.body;
+  // console.log(req.body);
+
+  if (
+    [userName, email, password, fullName].some((field) => field?.trim() === "")
+  ) {
+    throw new ApiError(400, "All fieds are required");
+  }
+
+  const existedUser = await User.findOne({
+    $or: [{ userName }, { email }, { phone }],
+  });
+  if (existedUser) {
+    throw new ApiError(
+      409,
+      "User with phone number , email or userName already exists"
+    );
+  }
+
+  const userData = {
+    userName,
+    email,
+    password,
+    fullName,
+    isOffline: isOffline || true,
+  };
+
+  // Include `role` only if it exists in the request body
+  if (role) {
+    userData.role = role;
+  }
+
+  if (phone) {
+    userData.phone = phone;
+  }
+
+  const user = await User.create(userData);
+
+  // Handle referral code if provided
+  if (referralCode) {
+    const referrer = await User.findOne({ referralCode });
+    if (!referrer) {
+      throw new ApiError(400, "Invalid referral code");
+    }
+    user.referredBy = referrer._id;
+
+    // Add this user to the referrer's referredUsers list
+    referrer.referredUsers.push(user._id);
+    await referrer.save();
+  }
+  await user.save();
+
+  const createdUser = await User.findById(user._id).select(
+    "-password -refreshToken"
+  );
+
+  if (!createdUser) {
+    throw new ApiError(500, "something went wrong while registering user");
+  }
+
+  const token = await generateTokens(createdUser._id);
+
+  return res
+    .status(201)
+    .cookie("token", token, options)
+    .json(
+      new ApiResponse(
+        200,
+        { user: createdUser, token },
+        "User registered successfully"
+      )
+    );
+});
+
 const loginUser = asyncHandler(async (req, res) => {
   const { email, password } = req.body;
 
@@ -365,6 +449,50 @@ const loginWithOtp = asyncHandler(async (req, res) => {
     );
 });
 
+const getOnlineUsers = asyncHandler(async (req, res) => {
+  if (req.user.role !== "admin") {
+    throw new ApiError(403, "You are not authorized to check online users");
+  }
+
+  const onlineUsers = await User.find({ isOffline: false })
+    .populate("subscribedSchemes")
+    .populate("address");
+
+  return res
+    .status(200)
+    .json(
+      new ApiResponse(
+        200,
+        onlineUsers,
+        onlineUsers.length > 0
+          ? `Total ${onlineUsers.length} online users fetched successfully`
+          : "No online users found"
+      )
+    );
+});
+
+const getOfflineUsers = asyncHandler(async (req, res) => {
+  if (req.user.role !== "admin") {
+    throw new ApiError(403, "You are not authorized to check offline users");
+  }
+
+  const offlineUsers = await User.find({ isOffline: true })
+    .populate("subscribedSchemes")
+    .populate("address");
+
+  return res
+    .status(200)
+    .json(
+      new ApiResponse(
+        200,
+        offlineUsers,
+        offlineUsers.length > 0
+          ? `Total ${offlineUsers.length} offline users fetched successfully`
+          : "No offline users found"
+      )
+    );
+});
+
 export {
   registerUser,
   loginUser,
@@ -378,4 +506,7 @@ export {
   editUser,
   sendOtpController,
   loginWithOtp,
+  registerUserOffline,
+  getOnlineUsers,
+  getOfflineUsers,
 };

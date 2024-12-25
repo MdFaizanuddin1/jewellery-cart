@@ -89,6 +89,10 @@ const userSchema = new mongoose.Schema(
       totalEarnings: { type: Number, default: 0 }, // Total earnings from referrals
       monthlyEarnings: { type: Number, default: 0 }, // Earnings for the current month
     },
+    isOffline: {
+      type: Boolean,
+      default: false,
+    },    
   },
   {
     timestamps: true,
