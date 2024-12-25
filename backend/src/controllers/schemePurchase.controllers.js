@@ -7,7 +7,7 @@ import { SchemePurchase } from "../models/schemePurchase.model.js";
 
 const subscribe = asyncHandler(async (req, res) => {
   const { schemeId } = req.params;
-  const { amount } = req.body;
+  const { amount, paymentMethod } = req.body;
   const userId = req.user._id;
   if (!userId) {
     throw new ApiError(404, "you are not authorized");
@@ -29,6 +29,7 @@ const subscribe = asyncHandler(async (req, res) => {
     amount,
     purchasedBy: user._id,
     scheme: scheme._id,
+    paymentMethod,
   });
 
   const purchasedSchemeDb = await SchemePurchase.findById(purchasedScheme._id)
@@ -186,7 +187,7 @@ const getUserSubscribedSchemes = asyncHandler(async (req, res) => {
     .json(
       new ApiResponse(
         200,
-        user.subscribedSchemes ? {schemes : user.subscribedSchemes, user} : {},
+        user.subscribedSchemes ? { schemes: user.subscribedSchemes, user } : {},
         user.subscribedSchemes.length > 0
           ? `Total Subscribed schemes is ${user.subscribedSchemes.length} retrieved successfully`
           : "user is not subscribed to any schemes"

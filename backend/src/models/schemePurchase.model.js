@@ -27,6 +27,12 @@ const schemePurchaseSchema = new mongoose.Schema(
       type: Boolean,
       default: false, // Mark if commission has been calculated
     },
+    paymentMethod: {
+      type: String,
+      enum: ["online", "offline"], // Allowed values
+      required: true,
+      default: "online",
+    },
   },
   {
     timestamps: true,
