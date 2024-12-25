@@ -86,10 +86,10 @@ const getUserEarnings = asyncHandler(async (req, res) => {
       {
         monthlyEarnings,
         totalEarnings,
-        range: {
-          startOfRange,
-          endOfRange,
-        },
+        // range: {
+        //   startOfRange,
+        //   endOfRange,
+        // },
       },
       "Earnings calculated and updated successfully"
     )
