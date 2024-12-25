@@ -9,6 +9,7 @@ import {
   getOnlineUsers,
   getReferredUsers,
   getReferrer,
+  getReferrersAndReferredUsers,
   loginUser,
   loginWithOtp,
   logoutUser,
@@ -42,6 +43,9 @@ router.post("/loginOtp", loginWithOtp);
 
 router.get("/userEarning", verifyJWT, getUserEarnings);
 router.get("/allUserEarning", verifyJWT, getAllUserEarnings);
+
+// get all referred users
+router.get("/getReferrersAndReferredUsers", verifyJWT, getReferrersAndReferredUsers);
 
 // offline - online customers
 router.post("/registerOffline", registerUserOffline);

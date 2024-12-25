@@ -493,6 +493,31 @@ const getOfflineUsers = asyncHandler(async (req, res) => {
     );
 });
 
+const getReferrersAndReferredUsers = asyncHandler(async (req, res) => {
+  if (req.user.role !== "admin") {
+    throw new ApiError(403, "You are not authorized to access this resource");
+  }
+
+  const referrers = await User.find({ referredUsers: { $exists: true, $not: { $size: 0 } } })
+    .select("fullName userName email referredUsers") // Select specific fields for clarity
+    .populate({
+      path: "referredUsers",
+      select: "fullName userName email",
+    });
+
+  if (referrers.length === 0) {
+    return res.status(404).json(new ApiResponse(404, [], "No referrers found"));
+  }
+
+  return res.status(200).json(
+    new ApiResponse(
+      200,
+      referrers,
+      `${referrers.length} referrers fetched successfully`
+    )
+  );
+});
+
 export {
   registerUser,
   loginUser,
@@ -509,4 +534,5 @@ export {
   registerUserOffline,
   getOnlineUsers,
   getOfflineUsers,
+  getReferrersAndReferredUsers
 };
