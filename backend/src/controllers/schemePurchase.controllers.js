@@ -29,7 +29,7 @@ const subscribe = asyncHandler(async (req, res) => {
     amount,
     purchasedBy: user._id,
     scheme: scheme._id,
-    paymentMethod,
+    paymentMethod: paymentMethod || "online",
   });
 
   const purchasedSchemeDb = await SchemePurchase.findById(purchasedScheme._id)

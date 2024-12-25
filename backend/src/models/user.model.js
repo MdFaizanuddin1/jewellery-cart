@@ -129,11 +129,12 @@ userSchema.methods.token = function () {
 // Generate a unique referral code on user creation
 userSchema.pre("save", function (next) {
   if (!this.referralCode) {
-    // this.referralCode = this._id.toString().slice(-6) + Math.random().toString(36).substring(2, 8); // Generate a simple unique code
-    this.referralCode = this._id.toString().slice(-8); // Generate a simple unique code
+    // Generate a 4-digit random code
+    this.referralCode = Math.floor(1000 + Math.random() * 9000).toString();
   }
   next();
 });
+
 
 // Create User model
 export const User = mongoose.model("User", userSchema);
