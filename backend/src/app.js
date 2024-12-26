@@ -26,6 +26,7 @@ import kycRouter from "./routes/panAadhar.routes.js";
 import schemePurchaseRouter from "./routes/schemePurchase.routes.js";
 import priceRouter from "./routes/goldSilverPrice.routes.js";
 import razorPayRouter from "./routes/razor.routes.js";
+import versionRouter from "./routes/version.routes.js";
 
 //routes declaration
 app.use("/api/v1/healthCheck", healthCheckRouter);
@@ -36,5 +37,6 @@ app.use("/api/v1/kyc", kycRouter);
 app.use("/api/v1/purchase", schemePurchaseRouter);
 app.use("/api/v1/price", priceRouter);
 app.use("/api/v1/razor", razorPayRouter);
+app.use("/api/v1/version", versionRouter);
 
 export { app };
